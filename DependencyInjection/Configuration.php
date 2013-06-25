@@ -21,18 +21,24 @@ class Configuration implements ConfigurationInterface
             ->append($this->getVendorNode('orm'))
             ->append($this->getVendorNode('mongodb'))
             ->append($this->getClassNode())
+            ->append($this->getUploadableNode())
             ->children()
                 ->scalarNode('default_locale')
                     ->cannotBeEmpty()
                     ->defaultValue('en')
                 ->end()
                 ->booleanNode('translation_fallback')->defaultFalse()->end()
+                ->booleanNode('persist_default_translation')->defaultFalse()->end()
+                ->booleanNode('skip_translation_on_load')->defaultFalse()->end()
             ->end()
         ;
 
         return $treeBuilder;
     }
 
+    /**
+     * @param string $name
+     */
     private function getVendorNode($name)
     {
         $treeBuilder = new TreeBuilder();
@@ -46,10 +52,14 @@ class Configuration implements ConfigurationInterface
                     ->scalarNode('translatable')->defaultFalse()->end()
                     ->scalarNode('timestampable')->defaultFalse()->end()
                     ->scalarNode('ipable')->defaultFalse()->end()
+                    ->scalarNode('blameable')->defaultFalse()->end()
                     ->scalarNode('sluggable')->defaultFalse()->end()
                     ->scalarNode('tree')->defaultFalse()->end()
                     ->scalarNode('loggable')->defaultFalse()->end()
                     ->scalarNode('sortable')->defaultFalse()->end()
+                    ->scalarNode('softdeleteable')->defaultFalse()->end()
+                    ->scalarNode('uploadable')->defaultFalse()->end()
+                    ->scalarNode('reference_integrity')->defaultFalse()->end()
                 ->end()
             ->end()
         ;
@@ -67,7 +77,7 @@ class Configuration implements ConfigurationInterface
             ->children()
                 ->scalarNode('translatable')
                     ->cannotBeEmpty()
-                    ->defaultValue('Stof\\DoctrineExtensionsBundle\\Listener\\TranslationListener')
+                    ->defaultValue('Gedmo\Translatable\TranslatableListener')
                 ->end()
                 ->scalarNode('timestampable')
                     ->cannotBeEmpty()
@@ -76,6 +86,9 @@ class Configuration implements ConfigurationInterface
                 ->scalarNode('ipable')
                     ->cannotBeEmpty()
                     ->defaultValue('Gedmo\\Ipable\\IpableListener')
+                ->scalarNode('blameable')
+                    ->cannotBeEmpty()
+                    ->defaultValue('Gedmo\\Blameable\\BlameableListener')
                 ->end()
                 ->scalarNode('sluggable')
                     ->cannotBeEmpty()
@@ -87,12 +100,51 @@ class Configuration implements ConfigurationInterface
                 ->end()
                 ->scalarNode('loggable')
                     ->cannotBeEmpty()
-                    ->defaultValue('Stof\\DoctrineExtensionsBundle\\Listener\\LoggableListener')
+                    ->defaultValue('Gedmo\Loggable\LoggableListener')
                 ->end()
                 ->scalarNode('sortable')
                     ->cannotBeEmpty()
                     ->defaultValue('Gedmo\\Sortable\\SortableListener')
                 ->end()
+                ->scalarNode('softdeleteable')
+                    ->cannotBeEmpty()
+                    ->defaultValue('Gedmo\\SoftDeleteable\\SoftDeleteableListener')
+                ->end()
+                ->scalarNode('uploadable')
+                    ->cannotBeEmpty()
+                    ->defaultValue('Gedmo\\Uploadable\\UploadableListener')
+                ->end()
+                ->scalarNode('reference_integrity')
+                    ->cannotBeEmpty()
+                    ->defaultValue('Gedmo\\ReferenceIntegrity\\ReferenceIntegrityListener')
+                ->end()
+            ->end()
+        ;
+
+        return $node;
+    }
+
+    private function getUploadableNode()
+    {
+        $treeBuilder = new TreeBuilder();
+        $node = $treeBuilder->root('uploadable');
+
+        $node
+            ->addDefaultsIfNotSet()
+            ->children()
+                ->scalarNode('default_file_path')
+                    ->cannotBeEmpty()
+                    ->defaultNull()
+                ->end()
+                ->scalarNode('mime_type_guesser_class')
+                    ->cannotBeEmpty()
+                    ->defaultValue('Stof\\DoctrineExtensionsBundle\\Uploadable\\MimeTypeGuesserAdapter')
+                ->end()
+                ->scalarNode('default_file_info_class')
+                    ->cannotBeEmpty()
+                    ->defaultValue('Stof\\DoctrineExtensionsBundle\\Uploadable\\UploadedFileInfo')
+                ->end()
+                ->booleanNode('validate_writable_directory')->defaultTrue()->end()
             ->end()
         ;
 
