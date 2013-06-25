@@ -86,6 +86,7 @@ class Configuration implements ConfigurationInterface
                 ->scalarNode('ipable')
                     ->cannotBeEmpty()
                     ->defaultValue('Gedmo\\Ipable\\IpableListener')
+                ->end()
                 ->scalarNode('blameable')
                     ->cannotBeEmpty()
                     ->defaultValue('Gedmo\\Blameable\\BlameableListener')
